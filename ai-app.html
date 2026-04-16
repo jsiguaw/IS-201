@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Generator | Joel Siguaw</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.92) 75%, rgba(0, 0, 0, 0.88) 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.35rem;
+            color: white;
+        }
+
+        .stats {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 22px;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 10px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background-color: #64a19d;
+            color: white;
+            border-color: #64a19d;
+        }
+
+        .goal-box {
+            min-height: 160px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .goal-meta {
+            min-height: 24px;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 13px 20px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .primary-btn {
+            background-color: #64a19d;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #78b4af;
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .secondary-btn:hover {
+            background-color: rgba(255, 255, 255, 0.14);
+            transform: translateY(-2px);
+        }
+
+        .message-box {
+            margin-top: 16px;
+            min-height: 24px;
+            color: #d8f3dc;
+            font-size: 0.95rem;
+        }
+
+        .favorites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .favorite-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: left;
+        }
+
+        .favorite-item p {
+            margin: 0 0 10px 0;
+            color: white;
+            line-height: 1.5;
+        }
+
+        .favorite-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .favorite-actions button {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+        }
+
+        .empty-state {
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        .nav-links {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin: 0 12px;
+            font-weight: 700;
+            transition: color 0.25s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+
+        .footer {
+            margin-top: 0px;
+            padding: 0px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+
+        @media (max-width: 850px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+
+            .goal-box {
+                font-size: 1.2rem;
+                min-height: 140px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>Goal Generator</h1>
+            <p>
+                A professional productivity tool designed to generate quick, actionable goals across focus, planning, physical activity, and personal discipline.
+            </p>
+        </div>
+
+        <div class="app-grid">
+            <div class="panel">
+                <h2>Generate a Goal</h2>
+                <div class="stats">
+                    Goals generated: <span id="goalCount">0</span>
+                </div>
+
+                <div class="category-buttons">
+                    <button class="category-btn active" onclick="setCategory('All', this)">All</button>
+                    <button class="category-btn" onclick="setCategory('Physical', this)">Physical</button>
+                    <button class="category-btn" onclick="setCategory('Mental', this)">Mental</button>
+                    <button class="category-btn" onclick="setCategory('Focus', this)">Focus</button>
+                    <button class="category-btn" onclick="setCategory('Planning', this)">Planning</button>
+                    <button class="category-btn" onclick="setCategory('Environment', this)">Environment</button>
+                </div>
+
+                <div class="goal-box" id="goalBox">
+                    Click “Generate Goal” to begin.
+                </div>
+
+                <div class="goal-meta" id="goalCategory"></div>
+
+                <div class="button-row">
+                    <button class="primary-btn" onclick="generateGoal()">Generate Goal</button>
+                    <button class="secondary-btn" onclick="copyGoal()">Copy Goal</button>
+                    <button class="secondary-btn" onclick="saveFavorite()">Save Favorite</button>
+                </div>
+
+                <div class="message-box" id="messageBox"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Saved Favorites</h2>
+                <div id="favoritesContainer" class="favorites-list"></div>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="fromscratch.html">Scratch Page</a>
+            <a href="index.html">Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const goals = [
+            { text: "Do 25 pushups right now.", category: "Physical" },
+            { text: "Run or jog for 1 mile.", category: "Physical" },
+            { text: "Do 50 bodyweight squats.", category: "Physical" },
+            { text: "Drink a full glass of water and stretch for 5 minutes.", category: "Physical" },
+            { text: "Go on a 10-minute walk without your phone.", category: "Mental" },
+            { text: "Read for 10 minutes with full focus.", category: "Mental" },
+            { text: "Spend 10 minutes outside and breathe deeply.", category: "Mental" },
+            { text: "Text someone you care about and check in.", category: "Mental" },
+            { text: "Put your phone away and focus on one task for 20 minutes.", category: "Focus" },
+            { text: "Do one thing you have been procrastinating for 5 minutes.", category: "Focus" },
+            { text: "Write down 3 goals for this week.", category: "Planning" },
+            { text: "Review your budget or finances for 10 minutes.", category: "Planning" },
+            { text: "Write one sentence about the life you want to build.", category: "Planning" },
+            { text: "Clean your desk or workspace.", category: "Environment" },
+            { text: "Organize one small part of your room.", category: "Environment" }
+        ];
+
+        let currentCategory = "All";
+        let currentGoal = "";
+        let currentGoalCategory = "";
+        let goalCount = 0;
+
+        function setCategory(category, buttonElement) {
+            currentCategory = category;
+
+            const buttons = document.querySelectorAll(".category-btn");
+            buttons.forEach(button => button.classList.remove("active"));
+            buttonElement.classList.add("active");
+
+            document.getElementById("messageBox").textContent = "Category selected: " + category;
+        }
+
+        function generateGoal() {
+            let filteredGoals = goals;
+
+            if (currentCategory !== "All") {
+                filteredGoals = goals.filter(goal => goal.category === currentCategory);
+            }
+
+            if (filteredGoals.length === 0) {
+                document.getElementById("messageBox").textContent = "No goals found for this category.";
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * filteredGoals.length);
+            const randomGoal = filteredGoals[randomIndex];
+
+            currentGoal = randomGoal.text;
+            currentGoalCategory = randomGoal.category;
+            goalCount++;
+
+            document.getElementById("goalBox").textContent = currentGoal;
+            document.getElementById("goalCategory").textContent = "Category: " + currentGoalCategory;
+            document.getElementById("goalCount").textContent = goalCount;
+            document.getElementById("messageBox").textContent = "";
+        }
+
+        function copyGoal() {
+            if (!currentGoal) {
+                document.getElementById("messageBox").textContent = "Generate a goal first.";
+                return;
+            }
+
+            navigator.clipboard.writeText(currentGoal)
+                .then(() => {
+                    document.getElementById("messageBox").textContent = "Goal copied to clipboard.";
+                })
+                .catch(() => {
+                    document.getElementById("messageBox").textContent = "Could not copy the goal.";
+                });
+        }
+
+        function getFavorites() {
+            const storedFavorites = localStorage.getItem("favoriteGoals");
+            return storedFavorites ? JSON.parse(storedFavorites) : [];
+        }
+
+        function saveFavorites(favorites) {
+            localStorage.setItem("favoriteGoals", JSON.stringify(favorites));
+        }
+
+        function saveFavorite() {
+            if (!currentGoal) {
+                document.getElementById("messageBox").textContent = "Generate a goal before saving.";
+                return;
+            }
+
+            let favorites = getFavorites();
+
+            const alreadySaved = favorites.some(goal => goal.text === currentGoal);
+
+            if (alreadySaved) {
+                document.getElementById("messageBox").textContent = "That goal is already saved.";
+                return;
+            }
+
+            favorites.push({
+                text: currentGoal,
+                category: currentGoalCategory
+            });
+
+            saveFavorites(favorites);
+            renderFavorites();
+            document.getElementById("messageBox").textContent = "Favorite goal saved.";
+        }
+
+        function useFavorite(goalText, category) {
+            currentGoal = goalText;
+            currentGoalCategory = category;
+            document.getElementById("goalBox").textContent = goalText;
+            document.getElementById("goalCategory").textContent = "Category: " + category;
+            document.getElementById("messageBox").textContent = "Favorite goal loaded.";
+        }
+
+        function deleteFavorite(goalText) {
+            let favorites = getFavorites();
+            favorites = favorites.filter(goal => goal.text !== goalText);
+            saveFavorites(favorites);
+            renderFavorites();
+            document.getElementById("messageBox").textContent = "Favorite goal removed.";
+        }
+
+        function renderFavorites() {
+            const favoritesContainer = document.getElementById("favoritesContainer");
+            const favorites = getFavorites();
+
+            if (favorites.length === 0) { 
+                favoritesContainer.innerHTML = `
+                    <div class="empty-state">
+                        No favorites saved yet.<br>
+                        Generate a goal and save one to keep it here.
+                    </div>
+                `;
+                return;
+            }
+
+            favoritesContainer.innerHTML = "";
+
+            favorites.forEach(goal => {
+                const favoriteItem = document.createElement("div");
+                favoriteItem.className = "favorite-item";
+
+                favoriteItem.innerHTML = `
+                    <p>${goal.text}</p>
+                    <div class="favorite-actions">
+                        <button class="secondary-btn" onclick='useFavorite(${JSON.stringify(goal.text)}, ${JSON.stringify(goal.category)})'>Use</button>
+                        <button class="secondary-btn" onclick='deleteFavorite(${JSON.stringify(goal.text)})'>Delete</button>
+                    </div>
+                `;
+
+                favoritesContainer.appendChild(favoriteItem);
+            });
+        }
+
+        renderFavorites();
+    </script>
+    <footer class="footer">
+        <p>© 2026 Joel Siguaw. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
